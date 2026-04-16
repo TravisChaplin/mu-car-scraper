@@ -1,0 +1,40 @@
+name: Run Scraper (Manual)
+
+on: # Trigger this workflow manually from the GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  scrape-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x' # Use your desired Python version
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 psycopg2-binary
+
+    - name: Run scraping script
+      env:
+        SUPABASE_HOST: ${{ secrets.SUPABASE_HOST }}
+        SUPABASE_DATABASE: ${{ secrets.SUPABASE_DATABASE }}
+        SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
+        SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+        SUPABASE_PORT: ${{ secrets.SUPABASE_PORT }} # Optional, default 5432 if not set
+      run: |
+        # Assuming your Python script is named 'mycar_scraper.py'
+        python mycar_scraper.py
+
+    - name: Upload logs (optional)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: scraper-logs
+        path: # Specify a path if your script generates log files, e.g., 'scraper.log'
